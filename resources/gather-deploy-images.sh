@@ -24,6 +24,12 @@ function get-images-per-env() {
 	      # don't check images that didn't change between the current revision and the target branch
 	      continue
 	    fi
+
+	    # Workaround for RHTAPBUGS-1284
+	    if [[ "$image" =~ "quay.io/redhat-appstudio/dance-bootstrap-app" ]]; then
+	      # Don't check the dance-bootstrap-app image
+	      continue
+	    fi
 	  fi
 	
 	  printf "%s\n" "$image"
