@@ -9,10 +9,22 @@ function build() {
     echo "Running $TASK_NAME:build"
     echo "Running Login"
     IMAGE_REGISTRY="${IMAGE%%/*}"
-    buildah login --username="$QUAY_IO_CREDS_USR" --password="$QUAY_IO_CREDS_PSW" $IMAGE_REGISTRY
+
+    # Determine credentials based on the registry
+    if [[ "$IMAGE_REGISTRY" == *"artifactory"* || "$IMAGE_REGISTRY" == *"jfrog"* ]]; then
+        USER_ID="$ARTIFACTORY_IO_CREDS_USR"
+        USER_PASSWORD="$ARTIFACTORY_IO_CREDS_PSW"
+    elif [[ "$IMAGE_REGISTRY" == *"nexus"* ]]; then
+        USER_ID="$NEXUS_IO_CREDS_USR"
+        USER_PASSWORD="$NEXUS_IO_CREDS_PSW"
+    else
+        USER_ID="$QUAY_IO_CREDS_USR"
+        USER_PASSWORD="$QUAY_IO_CREDS_PSW"
+    fi
+    buildah login --username="$USER_ID" --password="$USER_PASSWORD" $IMAGE_REGISTRY
     ERR=$?
     if [ $ERR != 0 ]; then
-        echo "Failed buildah login $IMAGE_REGISTRY for user $QUAY_IO_CREDS_USR "
+        echo "Failed buildah login $IMAGE_REGISTRY for user $USER_ID "
         exit $ERR
     fi
 
@@ -68,10 +80,10 @@ function generate-sboms() {
 
 function upload-sbom() {
     echo "Running $TASK_NAME:upload-sbom"
-    cosign login --username="$QUAY_IO_CREDS_USR" --password="$QUAY_IO_CREDS_PSW" $IMAGE_REGISTRY
+    cosign login --username="$USER_ID" --password="$USER_PASSWORD" $IMAGE_REGISTRY
     ERR=$?
     if [ $ERR != 0 ]; then
-        echo "Failed cosign login $IMAGE_REGISTRY for user $QUAY_IO_CREDS_USR "
+        echo "Failed cosign login $IMAGE_REGISTRY for user $USER_ID "
         exit $ERR
     fi
     cosign attach sbom --sbom $TEMP_DIR/files/sbom-cyclonedx.json --type cyclonedx "$IMAGE"

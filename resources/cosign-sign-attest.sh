@@ -26,7 +26,19 @@ function image-registry() {
 # Cosign can use the same credentials as buildah
 function cosign-login() {
     local image_registry="$(image-registry)"
-    cosign login --username="$QUAY_IO_CREDS_USR" --password="$QUAY_IO_CREDS_PSW" "$image_registry"
+
+    # Determine credentials based on the registry
+    if [[ "$image_registry" == *"artifactory"* || "$image_registry" == *"jfrog"* ]]; then
+        USER_ID="$ARTIFACTORY_IO_CREDS_USR"
+        USER_PASSWORD="$ARTIFACTORY_IO_CREDS_PSW"
+    elif [[ "$image_registry" == *"nexus"* ]]; then
+        USER_ID="$NEXUS_IO_CREDS_USR"
+        USER_PASSWORD="$NEXUS_IO_CREDS_PSW"
+    else
+        USER_ID="$QUAY_IO_CREDS_USR"
+        USER_PASSWORD="$QUAY_IO_CREDS_PSW"
+    fi
+    cosign login --username="$USER_ID" --password="$USER_PASSWORD" "$image_registry"
 }
 
 # A wrapper for running cosign used for both sign and attest.
