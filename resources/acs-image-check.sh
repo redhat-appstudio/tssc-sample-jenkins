@@ -52,7 +52,14 @@ function rox-image-check() {
             echo -n "--insecure-skip-tls-verify") \
         -e "${ROX_CENTRAL_ENDPOINT}" --image "$IMAGE" --output json --force \
         > roxctl_image_check_output.json
+
+    ROXCTL_CHECK_STATUS=$?
+
     cp roxctl_image_check_output.json acs-image-check.json
+
+    if [ "$ROXCTL_CHECK_STATUS" -ne 0 ]; then
+        exit 3
+    fi
 }
 
 function report() {
