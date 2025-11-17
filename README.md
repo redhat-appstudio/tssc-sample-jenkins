@@ -1,3 +1,8 @@
+# Deprecation Notice
+This repository is deprecated after tssc-sample-templates [PR 197](https://github.com/redhat-appstudio/tssc-sample-templates/pull/197) merged.
+There is no need to duplicate scripts that are already present in our runner image.
+ 
+
 # tssc-sample-jenkins shared library 
 
 This git repository contains a shared library of packaged TSSC Jenkins steps that match the default pipeline in Redhat Trusted Application Pipeline. 
